@@ -1,13 +1,18 @@
-package com.github.messageconsumer.service.util;
+package com.github.messageconsumer.service.order.util;
+
 
 import com.github.messageconsumer.entity.Cart;
+import com.github.messageconsumer.entity.Order;
 import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.CartRepository;
+import com.github.messageconsumer.repository.OrderRepository;
 import com.github.messageconsumer.repository.ProductRepository;
 import com.github.messageconsumer.repository.UserRepository;
-import com.github.messageconsumer.service.exception.CartErrorCode;
-import com.github.messageconsumer.service.exception.CartException;
+import com.github.messageconsumer.service.cart.exception.CartErrorCode;
+import com.github.messageconsumer.service.cart.exception.CartException;
+import com.github.messageconsumer.service.order.exception.OrderErrorCode;
+import com.github.messageconsumer.service.order.exception.OrderException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,33 +20,38 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 @Transactional
-public class ValidatCartMethod {
+public class ValidateOrderMethod {
+    private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
 
-
     public User validateUser(Long userId){
         return userRepository.findById(userId)
-                .orElseThrow(() -> new CartException(CartErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new OrderException(OrderErrorCode.USER_NOT_FOUND));
     }
 
-    public void validateStock(Integer inputQuantity, Product product){
-        if (inputQuantity <= 0 || inputQuantity > product.getLeftAmount()) {
-            throw new CartException(CartErrorCode.INVALID_QUANTITY);
-        }
+    public Order validateOrder(Long orderId, Long userId) {
+        return orderRepository.findByIdAndUsersId(orderId, userId)
+                .orElseThrow(() -> new OrderException(OrderErrorCode.THIS_ORDER_DOES_NOT_EXIST));
     }
 
     public Product validateProduct(Long productId){
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CartException(CartErrorCode.THIS_PRODUCT_DOES_NOT_EXIST));
+                .orElseThrow(() -> new OrderException(OrderErrorCode.THIS_PRODUCT_DOES_NOT_EXIST));
 
         Long stock = product.getLeftAmount();
         if (stock == null || stock <= 0) {
-            throw new CartException(CartErrorCode.OUT_OF_STOCK);
+            throw new OrderException(OrderErrorCode.OUT_OF_STOCK);
         }
 
         return product;
+    }
+
+    public void validateStock(Integer inputQuantity, Product product){
+        if (inputQuantity <= 0 || inputQuantity > product.getLeftAmount()) {
+            throw new OrderException(OrderErrorCode.INVALID_QUANTITY);
+        }
     }
 
     public Cart validateCart(Long cartId, Long userId){
@@ -52,6 +62,7 @@ public class ValidatCartMethod {
         }
         return cart;
     }
+
 
     private boolean existsInCart(Long userId, Long productId){
         return cartRepository.existsByUsersIdAndProductsId(userId, productId);

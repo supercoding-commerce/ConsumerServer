@@ -1,11 +1,8 @@
 package com.github.messageconsumer.dto;
 
 import com.github.messageconsumer.entity.Cart;
-import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import lombok.*;
-
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,7 +10,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CartRmqDto {
-    private User user;
+    private Long cartId;
+    private Long userId;
     private Long productId;
     private String productName;
     private Long price;
@@ -22,27 +20,26 @@ public class CartRmqDto {
     private Boolean isOrdered;
     private Integer totalPrice;
     private String options;
-    private LocalDateTime createdAt;
 
-    public static CartRmqDto fromEntity(Cart cart){
+    public static CartRmqDto fromEntityForPost(Cart cart){
         return CartRmqDto.builder()
-                .user(cart.getUsers())
+                .userId(cart.getUsers().getId())
                 .productId(cart.getProducts().getId())
                 .isOrdered(cart.getIsOrdered())
                 .quantity(cart.getQuantity())
                 .options(cart.getOptions())
-                .createdAt(cart.getCreatedAt())
                 .build();
     }
 
-//    public static Cart toEntity(CartRmqDto cartRmqDto){
-//        return Cart.builder()
-//                .users(cartRmqDto.getUser())
-//                .products(cartRmqDto.getProduct())
-//                .isOrdered(cartRmqDto.getIsOrdered())
-//                .quantity(cartRmqDto.getQuantity())
-//                .options(cartRmqDto.getOptions())
-//                .createdAt(cartRmqDto.getCreatedAt())
-//                .build();
-//    }
+    public static CartRmqDto fromEntityForModify(Cart cart){
+        return CartRmqDto.builder()
+                .cartId(cart.getId())
+                .userId(cart.getUsers().getId())
+                .productId(cart.getProducts().getId())
+                .isOrdered(cart.getIsOrdered())
+                .quantity(cart.getQuantity())
+                .options(cart.getOptions())
+                .build();
+    }
+
 }

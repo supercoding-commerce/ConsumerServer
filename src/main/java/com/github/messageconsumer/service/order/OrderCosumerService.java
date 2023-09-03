@@ -1,41 +1,55 @@
-package com.github.messageconsumer.service;
+package com.github.messageconsumer.service.order;
 
-import com.github.messageconsumer.dto.CartRmqDto;
+import com.github.messageconsumer.dto.OrderRmqDto;
 import com.github.messageconsumer.entity.Cart;
+import com.github.messageconsumer.entity.Order;
 import com.github.messageconsumer.entity.Product;
+import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.CartRepository;
-import com.github.messageconsumer.service.util.ValidatCartMethod;
-import com.rabbitmq.client.AMQP;
+import com.github.messageconsumer.repository.OrderRepository;
+import com.github.messageconsumer.service.order.util.ValidateOrderMethod;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class CartConsumerService {
+public class OrderCosumerService {
+    private final ValidateOrderMethod validateOrderMethod;
+    private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
-    private final ValidatCartMethod validatCartMethod;
-
-    @RabbitListener(queues = "post")
-    public void receiveCartMessage(CartRmqDto cartRmqDto, Message message, Channel channel) throws IOException {
+    @RabbitListener(queues = "postOrder")
+    public void postOrderQueue(OrderRmqDto orderRmqDto, Message message, Channel channel) throws IOException {
         try {
-            Product validatedProduct = validatCartMethod.validateProduct(cartRmqDto.getProductId());
-            cartRepository.save(
-                    Cart.builder()
-                            .users(cartRmqDto.getUser())
+            Product validatedProduct = validateOrderMethod.validateProduct(orderRmqDto.getProductId());
+            User validatedUser = validateOrderMethod.validateUser(orderRmqDto.getUserId());
+            Cart validatedCart = null;
+
+            if (orderRmqDto.getCartId() != null) {
+                validatedCart = validateOrderMethod.validateCart(orderRmqDto.getUserId(), orderRmqDto.getCartId());
+                //장바구니에서 주문한 경우, 장바구니 주문상태 변화
+                if(validatedCart != null){
+                    validatedCart.setIsOrdered(true);
+                    cartRepository.save(validatedCart);
+                }
+            }
+
+            orderRepository.save(
+                    Order.builder()
+                            .users(validatedUser)
                             .products(validatedProduct)
+                            .carts(validatedCart)
                             .createdAt(LocalDateTime.now())
-                            .isOrdered(false)
-                            .quantity(cartRmqDto.getQuantity())
-                            .options(cartRmqDto.getOptions())
+                            .orderState(orderRmqDto.getOrderState())
+                            .total_price(orderRmqDto.getTotal_price())
+                            .quantity(orderRmqDto.getQuantity())
+                            .options(orderRmqDto.getOptions())
                             .build()
             );
         } catch (Exception e) {

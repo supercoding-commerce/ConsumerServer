@@ -1,4 +1,4 @@
-package com.github.messageconsumer.service.exception;
+package com.github.messageconsumer.service.cart.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
