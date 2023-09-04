@@ -21,25 +21,5 @@ public class CartRmqDto {
     private Integer totalPrice;
     private String options;
 
-    public static CartRmqDto fromEntityForPost(Cart cart){
-        return CartRmqDto.builder()
-                .userId(cart.getUsers().getId())
-                .productId(cart.getProducts().getId())
-                .isOrdered(cart.getIsOrdered())
-                .quantity(cart.getQuantity())
-                .options(cart.getOptions())
-                .build();
-    }
-
-    public static CartRmqDto fromEntityForModify(Cart cart){
-        return CartRmqDto.builder()
-                .cartId(cart.getId())
-                .userId(cart.getUsers().getId())
-                .productId(cart.getProducts().getId())
-                .isOrdered(cart.getIsOrdered())
-                .quantity(cart.getQuantity())
-                .options(cart.getOptions())
-                .build();
-    }
 
 }

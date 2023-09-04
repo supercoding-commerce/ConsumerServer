@@ -21,17 +21,5 @@ public class OrderRmqDto {
     private Integer total_price;
     private String options;
 
-    public static OrderRmqDto fromEntity(Order order){
-        Product product = order.getProducts();
-        return OrderRmqDto.builder()
-                .cartId(order.getCarts().getId())
-                .userId(order.getUsers().getId())
-                .productId(product.getId())
-                .quantity(order.getQuantity())
-                .total_price(order.getTotal_price())
-                .orderState(order.getOrderState())
-                .options(order.getOptions())
-                .build();
-    }
 
 }

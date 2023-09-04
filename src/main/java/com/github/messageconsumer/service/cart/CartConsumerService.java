@@ -23,7 +23,7 @@ public class CartConsumerService {
     private final CartRepository cartRepository;
     private final ValidatCartMethod validatCartMethod;
 
-    @RabbitListener(queues = "postCart")
+    @RabbitListener(queues = "postCart", containerFactory = "rabbitListenerContainerFactory")
     public void postCartQueue(CartRmqDto cartRmqDto, Message message, Channel channel) throws IOException {
         try {
             Product validatedProduct = validatCartMethod.validateProduct(cartRmqDto.getProductId());
@@ -62,7 +62,7 @@ public class CartConsumerService {
         }
     }
 
-    @RabbitListener(queues = "putCart")
+    @RabbitListener(queues = "putCart", containerFactory = "rabbitListenerContainerFactory")
     public void putCartQueue(CartRmqDto cartRmqDto, Message message, Channel channel) throws IOException {
         try {
             Cart validatedCart = validatCartMethod.validateCart(cartRmqDto.getCartId(), cartRmqDto.getUserId());
