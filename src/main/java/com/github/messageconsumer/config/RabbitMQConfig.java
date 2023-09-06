@@ -24,8 +24,9 @@ import java.util.List;
 public class RabbitMQConfig {
     public static final String EXCHANGE_NAME = "exchange";
     // 여러 개의 큐와 라우팅 키를 리스트로 관리
-    public static final List<String> QUEUE_NAMES = Arrays.asList("postCart", "putCart", "postOrder", "putOrder", "postPayment", "putPayment");
-    public static final List<String> ROUTING_KEYS = Arrays.asList("postCart", "putCart", "postOrder", "putOrder", "postPayment", "putPayment");
+    public static final List<String> QUEUE_NAMES = Arrays.asList("postCart", "putCart", "postOrder", "putOrder", "postPayment", "putPayment", "postRoom", "postChat1", "postChat2", "postChat3", "postChat4", "postChat5");
+    public static final List<String> ROUTING_KEYS = Arrays.asList("postCart", "putCart", "postOrder", "putOrder", "postPayment", "putPayment", "postRoom", "postChat", "postChat", "postChat", "postChat", "postChat");
+
 
     @Value("${rabbitmq.host}")
     private String rmqHost;
@@ -59,6 +60,7 @@ public class RabbitMQConfig {
         }
         return queues;
     }
+
     @Bean
     public List<Binding> bindings(List<Queue> queues, DirectExchange exchange) {
         // 바인딩들을 생성하고 리스트로 반환

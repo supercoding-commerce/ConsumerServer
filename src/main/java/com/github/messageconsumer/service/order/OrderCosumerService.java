@@ -107,7 +107,7 @@ public class OrderCosumerService {
 
             // 재시도 제한 설정
             int maxRetries = 3; // 최대 재시도 횟수 설정
-            Integer retries = (Integer) message.getMessageProperties().getHeader("x-retries");
+            Integer retries = (Integer) message.getMessageProperties().getHeaders().getOrDefault("x-retries", 0);
 
             if (retries < maxRetries) {
                 // 재시도 횟수 증가

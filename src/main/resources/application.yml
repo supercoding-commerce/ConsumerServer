@@ -33,6 +33,10 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+
 rabbitmq:
   host: ${RMQ_HOST}
   port: 5672
