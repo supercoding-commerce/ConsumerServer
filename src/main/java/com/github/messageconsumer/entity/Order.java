@@ -40,7 +40,7 @@ public class Order {
     private Integer quantity;
 
     @Column(name= "total_price")
-    private Integer total_price;
+    private Integer totalPrice;
 
     @Column(name="created_at")
     LocalDateTime createdAt;

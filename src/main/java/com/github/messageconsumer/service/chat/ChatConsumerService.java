@@ -31,11 +31,21 @@ public class ChatConsumerService {
     @RabbitListener(queues = "postRoom", containerFactory = "rabbitListenerContainerFactory")
     public void postRoom(RoomRmqDto roomRmqDto, Message message, Channel channel) throws IOException {
         try {
-            Optional<Chat> chat = chatRepository.findByCustomRoomId(roomRmqDto.getCustomRoomId());
-            if (chat.isPresent()) {
-                // 이미 존재하는 경우 아무것도 하지 않고 성공 처리
-                log.info("Chat already exists for customRoomId: " + roomRmqDto.getCustomRoomId());
+            System.out.println("postRoom11111111111");
+            Optional<Chat> chatOptional = chatRepository.findByCustomRoomId(roomRmqDto.getCustomRoomId());
+            if (chatOptional.isPresent()) {
+                Chat chat = chatOptional.get();
+                // Chat 객체 업데이트
+                chat.setSellerId(roomRmqDto.getSellerId());
+                chat.setShopName(roomRmqDto.getShopName());
+                chat.setUserId(roomRmqDto.getUserId());
+                chat.setUserName(roomRmqDto.getUserName());
+                chat.setProductId(roomRmqDto.getProductId());
+
+                chatRepository.save(chat); // Chat 업데이트 후 저장
+
             } else {
+                System.out.println("postRoom222222222");
                 // 존재하지 않는 경우 새로운 Chat 객체 생성 및 저장
                 Chat newChat = Chat.builder()
                         .customRoomId(roomRmqDto.getCustomRoomId())

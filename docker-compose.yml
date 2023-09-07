@@ -1,0 +1,21 @@
+version: '3'
+services:
+  commerce:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+
+#version: '3'
+#services:
+#  commerce:
+#    image: zin354/commerce-consumer:latest
+#    restart: always
+#    ports:
+#      - "8080:8080"
+#    env_file:
+#      - .env

@@ -6,6 +6,7 @@ import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.CartRepository;
 import com.github.messageconsumer.service.cart.util.ValidatCartMethod;
+import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +59,10 @@ public class CartConsumerService {
                 // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
                 log.error("Max retries exceeded. Discarding message.");
+
+                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
+                String dlqRoutingKey = "dlq.postCart"; // DLQ로 메시지를 보낼 Routing Key
+                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
             }
         }
     }
@@ -92,6 +97,9 @@ public class CartConsumerService {
                 // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
                 log.error("Max retries exceeded. Discarding message.");
+                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
+                String dlqRoutingKey = "dlq.putCart"; // DLQ로 메시지를 보낼 Routing Key
+                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
             }
         }
     }

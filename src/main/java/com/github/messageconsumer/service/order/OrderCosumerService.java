@@ -50,7 +50,7 @@ public class OrderCosumerService {
                             .carts(validatedCart)
                             .createdAt(LocalDateTime.now())
                             .orderState(orderRmqDto.getOrderState())
-                            .total_price(orderRmqDto.getTotal_price())
+                            .totalPrice(orderRmqDto.getTotal_price())
                             .quantity(orderRmqDto.getQuantity())
                             .options(orderRmqDto.getOptions())
                             .build()
@@ -76,9 +76,9 @@ public class OrderCosumerService {
                 //x-dead-letter-exchange:	dlqExchange
                 //x-dead-letter-routing-key:	dlq.postOrder
                 // 최대 재시도 횟수를 초과하면 메시지를 DLQ로 보냅니다.
-//                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
-//                String dlqRoutingKey = "dlq.postOrder"; // DLQ로 메시지를 보낼 Routing Key
-//                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
+                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
+                String dlqRoutingKey = "dlq.postOrder"; // DLQ로 메시지를 보낼 Routing Key
+                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
 
                 // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
@@ -123,9 +123,9 @@ public class OrderCosumerService {
                 //x-dead-letter-exchange:	dlqExchange
                 //x-dead-letter-routing-key:	dlq.postOrder
                 // 최대 재시도 횟수를 초과하면 메시지를 DLQ로 보냅니다.
-//                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
-//                String dlqRoutingKey = "dlq.postOrder"; // DLQ로 메시지를 보낼 Routing Key
-//                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
+                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
+                String dlqRoutingKey = "dlq.putOrder"; // DLQ로 메시지를 보낼 Routing Key
+                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
 
                 // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
