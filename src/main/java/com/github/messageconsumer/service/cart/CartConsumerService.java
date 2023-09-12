@@ -11,8 +11,9 @@ import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -24,49 +25,38 @@ public class CartConsumerService {
     private final CartRepository cartRepository;
     private final ValidatCartMethod validatCartMethod;
 
-    @RabbitListener(queues = "postCart", containerFactory = "rabbitListenerContainerFactory")
+    @Transactional
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    exchange = @Exchange(value = "exchange"),
+                    value = @Queue(value = "postCart",
+                            arguments = @Argument(name="x-dead-letter-exchange", value = "dlqExchange"))
+            ), ackMode = "MANUAL", containerFactory = "rabbitListenerContainerFactory")
     public void postCartQueue(CartRmqDto cartRmqDto, Message message, Channel channel) throws IOException {
-        try {
-            Product validatedProduct = validatCartMethod.validateProduct(cartRmqDto.getProductId());
-            User validatedUser = validatCartMethod.validateUser(cartRmqDto.getUserId());
-            cartRepository.save(
-                    Cart.builder()
-                            .users(validatedUser)
-                            .products(validatedProduct)
-                            .createdAt(LocalDateTime.now())
-                            .isOrdered(false)
-                            .quantity(cartRmqDto.getQuantity())
-                            .options(cartRmqDto.getOptions())
-                            .build()
-            );
-        } catch (Exception e) {
-            log.error("Error processing cart message: " + e.getMessage(), e);
 
-            // 재시도 제한 설정
-            int maxRetries = 3; // 최대 재시도 횟수 설정
-            Integer retries = (Integer) message.getMessageProperties().getHeaders().getOrDefault("x-retries", 0);
+           try {
+               Product validatedProduct = validatCartMethod.validateProduct(cartRmqDto.getProductId());
+               User validatedUser = validatCartMethod.validateUser(cartRmqDto.getUserId());
+               cartRepository.save(
+                       Cart.builder()
+                               .users(validatedUser)
+                               .products(validatedProduct)
+                               .createdAt(LocalDateTime.now())
+                               .isOrdered(false)
+                               .quantity(cartRmqDto.getQuantity())
+                               .options(cartRmqDto.getOptions())
+                               .build()
+               );
+               channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+           }catch (Exception e){
+               log.error("postCart exception: " + e.getMessage(), e);
+               message.getMessageProperties().setHeader("failed_causes", "관리자 문의");
+               channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+           }
 
-            if (retries < maxRetries) {
-                // 재시도 횟수 증가
-                retries++;
-                message.getMessageProperties().setHeader("x-retries", retries);
-
-                // 일정 시간 후 재시도
-                long delayMillis = 5000; // 5초 대기
-                message.getMessageProperties().setExpiration(String.valueOf(delayMillis));
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } else {
-                // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
-                channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
-                log.error("Max retries exceeded. Discarding message.");
-
-                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
-                String dlqRoutingKey = "dlq.postCart"; // DLQ로 메시지를 보낼 Routing Key
-                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
-            }
-        }
     }
 
+    @Transactional
     @RabbitListener(queues = "putCart", containerFactory = "rabbitListenerContainerFactory")
     public void putCartQueue(CartRmqDto cartRmqDto, Message message, Channel channel) throws IOException {
         try {
@@ -78,29 +68,9 @@ public class CartConsumerService {
                     validatedCart
             );
         } catch (Exception e) {
-            log.error("Error processing cart message: " + e.getMessage(), e);
-
-            // 재시도 제한 설정
-            int maxRetries = 3; // 최대 재시도 횟수 설정
-            Integer retries = (Integer) message.getMessageProperties().getHeader("x-retries");
-
-            if (retries < maxRetries) {
-                // 재시도 횟수 증가
-                retries++;
-                message.getMessageProperties().setHeader("x-retries", retries);
-
-                // 일정 시간 후 재시도
-                long delayMillis = 5000; // 5초 대기
-                message.getMessageProperties().setExpiration(String.valueOf(delayMillis));
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } else {
-                // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
-                channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
-                log.error("Max retries exceeded. Discarding message.");
-                String dlqExchange = "dlqExchange"; // DLQ로 메시지를 보낼 Exchange 이름
-                String dlqRoutingKey = "dlq.putCart"; // DLQ로 메시지를 보낼 Routing Key
-                channel.basicPublish(dlqExchange, dlqRoutingKey, null, message.getBody());
-            }
+            log.error("putCart exception: " + e.getMessage(), e);
+            message.getMessageProperties().setHeader("failed_causes", "관리자 문의");
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         }
     }
 }

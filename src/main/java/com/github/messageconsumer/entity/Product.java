@@ -5,8 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,28 +22,28 @@ public class Product {
     private Long id;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "users_id", nullable = false)
-    private User users;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sellers_id", nullable = false)
+    private Seller seller;
 
-    @Size(max = 255)
     @NotNull
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 20)
     private String name;
 
+    @Size(max = 255)
     @Column(name = "content")
     private String content;
 
     @Size(max = 255)
-    @Column(name = "thumbnail_url", nullable = false)
+    @Column(name = "thumbnail_url")
     private String thumbnailUrl;
 
     @NotNull
     @Column(name = "price", nullable = false)
-    private Long price;
+    private Integer price;
 
     @Column(name = "left_amount")
-    private Long leftAmount;
+    private Integer leftAmount;
 
     @NotNull
     @Column(name = "created_at", nullable = false)
@@ -56,12 +56,18 @@ public class Product {
     @Column(name = "is_deleted", nullable = false, columnDefinition = "tinyint default 0")
     private Boolean isDeleted ;
 
-    @Column(name = "product_category")
+    @Column(name = "product_category", length = 20)
     private String productCategory;
 
-    @Column(name = "gender_category")
+    @Column(name = "gender_category", length = 10)
     private String genderCategory;
 
-    @Column(name = "age_category")
+    @Column(name = "age_category", length = 10)
     private String ageCategory;
+
+    @Column(name = "options")
+    private String options;
+
+
+
 }

@@ -1,7 +1,7 @@
-package com.github.messageconsumer.advice.exception;
+package com.github.messageconsumer.web.advice.exception;
 
 
-import com.github.messageconsumer.advice.exception.type.ErrorCode;
+import com.github.messageconsumer.web.advice.exception.type.ErrorCode;
 import lombok.*;
 
 @Getter

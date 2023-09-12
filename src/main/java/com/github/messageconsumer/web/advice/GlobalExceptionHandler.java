@@ -1,8 +1,8 @@
-package com.github.messageconsumer.advice;
+package com.github.messageconsumer.web.advice;
 
 
-import com.github.messageconsumer.advice.exception.ErrorResponse;
-import com.github.messageconsumer.advice.exception.type.ErrorCode;
+import com.github.messageconsumer.web.advice.exception.ErrorResponse;
+import com.github.messageconsumer.web.advice.exception.type.ErrorCode;
 import com.github.messageconsumer.service.cart.exception.CartErrorResponse;
 import com.github.messageconsumer.service.cart.exception.CartException;
 import com.github.messageconsumer.service.order.exception.OrderErrorResponse;
@@ -47,14 +47,14 @@ public class GlobalExceptionHandler {
 
     }
 
-    @ExceptionHandler(OrderException.class)
-    public ResponseEntity<?> handleOrderException(OrderException e){
-        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
-                .body(OrderErrorResponse.builder()
-                        .errorCode(e.getErrorCode())
-                        .errorMessage(e.getErrorMessage())
-                        .build());
-    }
+//    @ExceptionHandler(OrderException.class)
+//    public ResponseEntity<?> handleOrderException(OrderException e){
+//        return ResponseEntity.status(e.getErrorCode().getHttpStatus())
+//                .body(OrderErrorResponse.builder()
+//                        .errorCode(e.getErrorCode())
+//                        .errorMessage(e.getErrorMessage())
+//                        .build());
+//    }
 
 
 }

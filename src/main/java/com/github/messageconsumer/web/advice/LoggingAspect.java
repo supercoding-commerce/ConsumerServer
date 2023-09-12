@@ -1,4 +1,4 @@
-package com.github.messageconsumer.advice;
+package com.github.messageconsumer.web.advice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ public class LoggingAspect {
 
     private final HttpServletRequest request;
 
-    @Before("execution(* com.github.commerce..*Controller.*(..))")
+    @Before("execution(* com.github.messageconsumer..*Controller.*(..))")
     public void beforeAdvice() {
         String endpoint = request.getRequestURI(); // 현재 요청의 엔드포인트 경로를 얻어옴
 

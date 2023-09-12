@@ -40,7 +40,7 @@ public class ValidateOrderMethod {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new OrderException(OrderErrorCode.THIS_PRODUCT_DOES_NOT_EXIST));
 
-        Long stock = product.getLeftAmount();
+        Integer stock = product.getLeftAmount();
         if (stock == null || stock <= 0) {
             throw new OrderException(OrderErrorCode.OUT_OF_STOCK);
         }
@@ -48,10 +48,8 @@ public class ValidateOrderMethod {
         return product;
     }
 
-    public void validateStock(Integer inputQuantity, Product product){
-        if (inputQuantity <= 0 || inputQuantity > product.getLeftAmount()) {
-            throw new OrderException(OrderErrorCode.INVALID_QUANTITY);
-        }
+    public boolean validateStock(Integer inputQuantity, Product product){
+        return inputQuantity > 0 && inputQuantity <= product.getLeftAmount();
     }
 
     public Cart validateCart(Long cartId, Long userId){

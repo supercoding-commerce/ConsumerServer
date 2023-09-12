@@ -26,6 +26,11 @@ public class Order {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sellers_id", nullable = false)
+    private Seller sellers;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "products_id", nullable = false)
     private Product products;
 
@@ -40,7 +45,7 @@ public class Order {
     private Integer quantity;
 
     @Column(name= "total_price")
-    private Integer totalPrice;
+    private Long totalPrice;
 
     @Column(name="created_at")
     LocalDateTime createdAt;
@@ -48,6 +53,6 @@ public class Order {
     @Column(name = "options")
     private String options;
 
-//    @Column(name="option_id", length = 50)
-//    String optionId;
+    @Column(name = "failed_causes")
+    private String failed_causes;
 }

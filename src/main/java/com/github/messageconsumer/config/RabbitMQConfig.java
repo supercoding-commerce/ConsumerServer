@@ -26,13 +26,13 @@ public class RabbitMQConfig {
     public static final List<String> ROUTING_KEYS = Arrays.asList("postCart", "putCart", "postOrder", "putOrder", "postPayment", "putPayment", "postRoom", "postChat", "postChat", "postChat", "postChat", "postChat");
 
 
-    @Value("${rabbitmq.host}")
+    @Value("${spring.rabbitmq.host}")
     private String rmqHost;
 
-    @Value("${rabbitmq.username}")
+    @Value("${spring.rabbitmq.username}")
     private String rmqUsername;
 
-    @Value("${rabbitmq.password}")
+    @Value("${spring.rabbitmq.password}")
     private String rmqPassword;
 
     @Bean
@@ -50,24 +50,24 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public List<Queue> queues() {
-        // 큐들을 생성하고 리스트로 반환
-        List<Queue> queues = new ArrayList<>();
-        for (String queueName : QUEUE_NAMES) {
-            queues.add(new Queue(queueName));
-        }
-        return queues;
-    }
+//    public List<Queue> queues() {
+//        // 큐들을 생성하고 리스트로 반환
+//        List<Queue> queues = new ArrayList<>();
+//        for (String queueName : QUEUE_NAMES) {
+//            queues.add(new Queue(queueName));
+//        }
+//        return queues;
+//    }
 
-    @Bean
-    public List<Binding> bindings(List<Queue> queues, DirectExchange exchange) {
-        // 바인딩들을 생성하고 리스트로 반환
-        List<Binding> bindings = new ArrayList<>();
-        for (int i = 0; i < QUEUE_NAMES.size(); i++) {
-            bindings.add(BindingBuilder.bind(queues.get(i)).to(exchange).with(ROUTING_KEYS.get(i)));
-        }
-        return bindings;
-    }
+//    @Bean
+//    public List<Binding> bindings(List<Queue> queues, DirectExchange exchange) {
+//        // 바인딩들을 생성하고 리스트로 반환
+//        List<Binding> bindings = new ArrayList<>();
+//        for (int i = 0; i < QUEUE_NAMES.size(); i++) {
+//            bindings.add(BindingBuilder.bind(queues.get(i)).to(exchange).with(ROUTING_KEYS.get(i)));
+//        }
+//        return bindings;
+//    }
 
     Jackson2JsonMessageConverter messageConverter(ObjectMapper mapper){
         var converter = new Jackson2JsonMessageConverter(mapper);
@@ -98,6 +98,13 @@ public class RabbitMQConfig {
         factory.setConcurrentConsumers(5); // 예: 5개의 채널을 사용하여 메시지 처리
         factory.setMaxConcurrentConsumers(10);
         return factory;
+    }
+
+    @Bean
+    public SimpleRabbitListenerContainerFactory deadListenerContainer(ConnectionFactory connectionFactory) {
+        SimpleRabbitListenerContainerFactory container = new SimpleRabbitListenerContainerFactory();
+        container.setConnectionFactory(connectionFactory);
+        return container;
     }
 
 }

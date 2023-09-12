@@ -1,4 +1,4 @@
-package com.github.messageconsumer.advice.exception.type;
+package com.github.messageconsumer.web.advice.exception.type;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

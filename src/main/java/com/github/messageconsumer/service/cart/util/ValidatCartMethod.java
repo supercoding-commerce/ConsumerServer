@@ -36,7 +36,7 @@ public class ValidatCartMethod {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CartException(CartErrorCode.THIS_PRODUCT_DOES_NOT_EXIST));
 
-        Long stock = product.getLeftAmount();
+        Integer stock = product.getLeftAmount();
         if (stock == null || stock <= 0) {
             throw new CartException(CartErrorCode.OUT_OF_STOCK);
         }

@@ -1,5 +1,6 @@
 server:
   port: 8081
+
 spring:
   mvc:
     path_match:
@@ -37,8 +38,17 @@ spring:
     mongodb:
       uri: ${MONGO_URI}
 
-rabbitmq:
-  host: ${RMQ_HOST}
-  port: 5672
-  username: ${RMQ_USER}
-  password: ${RMQ_PASSWORD}
+  rabbitmq:
+    dynamic: true
+    listner:
+      simple:
+        retry :
+          enabled : true
+          initial-interval: 3s #최초 재시도 간격시간
+          max-attemps: 3 # 재시도 최대 횟수
+          max-interval: 10s # 최대 재시도 간격 시간
+          multiplier: 2 #initial-interval의 계수
+    host: ${RMQ_HOST}
+    port: 5672
+    username: ${RMQ_USER}
+    password: ${RMQ_PASSWORD}

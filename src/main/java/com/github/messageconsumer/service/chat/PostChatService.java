@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class PostChatService {
     private final ChatRepository chatRepository;
 
+    @Transactional
     public void postChat(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         try {
             // customRoomId에 해당하는 Chat document 조회
@@ -33,34 +35,18 @@ public class PostChatService {
                     .mapToInt(Integer::intValue)
                     .max()
                     .orElse(0);
-            if(maxMessageTag > messageTag ){
-                messageTag = maxMessageTag + 1;
-            }
-            chat.getChats().put(messageTag, newMessage);
-            chatRepository.save(chat);
 
+            // messageTag를 조정하여 덮어쓰기
+            int newMessageTag = maxMessageTag > messageTag ? maxMessageTag + messageTag : messageTag;
+
+            chat.getChats().put(newMessageTag, newMessage);
+            chatRepository.save(chat);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
         } catch (Exception e) {
-            log.error("Error processing cart message: " + e.getMessage(), e);
+            log.error("Error processing chat message: " + e.getMessage(), e);
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
 
-            // 재시도 제한 설정
-            int maxRetries = 3; // 최대 재시도 횟수 설정
-            Integer retries = (Integer) message.getMessageProperties().getHeaders().getOrDefault("x-retries", 0);
-
-            if (retries < maxRetries) {
-                // 재시도 횟수 증가
-                retries++;
-                message.getMessageProperties().setHeader("x-retries", retries);
-
-                // 일정 시간 후 재시도
-                long delayMillis = 5000; // 5초 대기
-                message.getMessageProperties().setExpiration(String.valueOf(delayMillis));
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } else {
-                // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
-                channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
-                log.error("Max retries exceeded. Discarding message.");
-            }
         }
     }
 }

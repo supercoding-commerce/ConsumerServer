@@ -38,8 +38,11 @@ public class Cart {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-//    @Column(name = "option_id", length = 50)
-//    private String optionId;
+    @Column(name = "cart_state", columnDefinition = "int default 1")
+    private Integer cartState;
+
+    @Column(name = "failed_causes")
+    private String failed_causes;
 
     @Column(name = "options")
     private String options;

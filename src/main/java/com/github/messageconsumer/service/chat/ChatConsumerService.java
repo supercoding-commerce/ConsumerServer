@@ -8,12 +8,14 @@ import com.github.messageconsumer.entity.Cart;
 import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.ChatRepository;
+import com.github.messageconsumer.service.order.exception.OrderException;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,10 +30,14 @@ public class ChatConsumerService {
     private final ChatRepository chatRepository;
     private final PostChatService postChatService;
 
-    @RabbitListener(queues = "postRoom", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    exchange = @Exchange(value = "exchange"),
+                    value = @Queue(value = "postRoom",
+                            arguments = @Argument(name="x-dead-letter-exchange", value = "dlqExchange"))
+            ), ackMode = "MANUAL", containerFactory = "rabbitListenerContainerFactory")
     public void postRoom(RoomRmqDto roomRmqDto, Message message, Channel channel) throws IOException {
         try {
-            System.out.println("postRoom11111111111");
             Optional<Chat> chatOptional = chatRepository.findByCustomRoomId(roomRmqDto.getCustomRoomId());
             if (chatOptional.isPresent()) {
                 Chat chat = chatOptional.get();
@@ -43,7 +49,7 @@ public class ChatConsumerService {
                 chat.setProductId(roomRmqDto.getProductId());
 
                 chatRepository.save(chat); // Chat 업데이트 후 저장
-
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             } else {
                 System.out.println("postRoom222222222");
                 // 존재하지 않는 경우 새로운 Chat 객체 생성 및 저장
@@ -57,29 +63,13 @@ public class ChatConsumerService {
                         .build();
                 chatRepository.save(newChat);
                 log.info("New Chat created for customRoomId: " + roomRmqDto.getCustomRoomId());
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             }
 
-        } catch (Exception e) {
-            log.error("Error processing cart message: " + e.getMessage(), e);
+        } catch (OrderException e) {
+            log.error("Error processing chat message: " + e.getMessage(), e);
+            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
 
-            // 재시도 제한 설정
-            int maxRetries = 3; // 최대 재시도 횟수 설정
-            Integer retries = (Integer) message.getMessageProperties().getHeaders().getOrDefault("x-retries", 0);
-
-            if (retries < maxRetries) {
-                // 재시도 횟수 증가
-                retries++;
-                message.getMessageProperties().setHeader("x-retries", retries);
-
-                // 일정 시간 후 재시도
-                long delayMillis = 5000; // 5초 대기
-                message.getMessageProperties().setExpiration(String.valueOf(delayMillis));
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);
-            } else {
-                // 최대 재시도 횟수를 초과하면 메시지를 버립니다.
-                channel.basicReject(message.getMessageProperties().getDeliveryTag(), false);
-                log.error("Max retries exceeded. Discarding message.");
-            }
         }
     }
 
