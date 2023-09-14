@@ -29,10 +29,11 @@ public class Chat {
 
     private String userName;
 
-    private Map<Integer, Map<String, String>> chats;
+
+    private Map<String, Map<String, String>> chats;
 
 
-    public Map<Integer, Map<String, String>> getChats() {
+    public Map<String, Map<String, String>> getChats() {
         if (chats == null) {
             chats = new HashMap<>(); // 빈 Map을 초기화
         }

@@ -13,4 +13,5 @@ public class ChatRmqDto {
     private Integer messageTag;
     private String sender;
     private String content;
+    private String createdAt;
 }

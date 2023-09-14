@@ -95,8 +95,8 @@ public class RabbitMQConfig {
         factory.setPrefetchCount(10); // 예: 10개의 메시지를 미리 가져옴
 
         // channel 개수 설정 (동시에 처리할 메시지 수)
-        factory.setConcurrentConsumers(5); // 예: 5개의 채널을 사용하여 메시지 처리
-        factory.setMaxConcurrentConsumers(10);
+        factory.setConcurrentConsumers(3); // 예: 5개의 채널을 사용하여 메시지 처리
+        factory.setMaxConcurrentConsumers(5);
         return factory;
     }
 

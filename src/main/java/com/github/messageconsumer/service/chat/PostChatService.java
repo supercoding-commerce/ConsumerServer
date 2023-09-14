@@ -30,16 +30,17 @@ public class PostChatService {
             Map<String, String> newMessage = new HashMap<>();
             newMessage.put("sender", chatRmqDto.getSender()); // 발신자 설정
             newMessage.put("content", chatRmqDto.getContent()); // 메시지 내용 설정
-            int messageTag = chatRmqDto.getMessageTag();
-            int maxMessageTag = chat.getChats().keySet().stream()
-                    .mapToInt(Integer::intValue)
-                    .max()
-                    .orElse(0);
-
-            // messageTag를 조정하여 덮어쓰기
-            int newMessageTag = maxMessageTag > messageTag ? maxMessageTag + messageTag : messageTag;
-
-            chat.getChats().put(newMessageTag, newMessage);
+            //newMessage.put("createdAt", chatRmqDto.getCreatedAt());
+//            int messageTag = chatRmqDto.getMessageTag();
+//            int maxMessageTag = chat.getChats().keySet().stream()
+//                    .mapToInt(Integer::intValue)
+//                    .max()
+//                    .orElse(0);
+//
+//            // messageTag를 조정하여 덮어쓰기
+//            int newMessageTag = maxMessageTag > messageTag ? maxMessageTag + messageTag : messageTag;
+            String sanitizedKey = chatRmqDto.getCreatedAt().replace(".", "-");
+            chat.getChats().put(sanitizedKey, newMessage);
             chatRepository.save(chat);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
