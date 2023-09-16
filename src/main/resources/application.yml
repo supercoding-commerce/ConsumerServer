@@ -12,19 +12,19 @@ spring:
         username: ${DB_USER}
         password: ${DB_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
+        jdbc-url: jdbc:mysql://${DB_HOST_MASTER}:3306/${DB_NAME}
     slave:
       hikari:
         username: ${DB_USER}
         password: ${DB_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
+        jdbc-url: jdbc:mysql://${DB_HOST_SLAVE1}:3306/${DB_NAME}
     slave2:
       hikari:
         username: ${DB_USER}
         password: ${DB_PASSWORD}
         driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://${DB_HOST}:3306/${DB_NAME}
+        jdbc-url: jdbc:mysql://${DB_HOST_SLAVE2}:3306/${DB_NAME}
   jpa:
     # local
 #    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect

@@ -38,7 +38,7 @@ public class Cart {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "cart_state", columnDefinition = "int default 1")
+    @Column(name = "cart_state", columnDefinition = "int default 0")
     private Integer cartState;
 
     @Column(name = "failed_causes")

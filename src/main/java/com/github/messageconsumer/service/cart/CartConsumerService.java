@@ -43,6 +43,7 @@ public class CartConsumerService {
                                .products(validatedProduct)
                                .createdAt(LocalDateTime.now())
                                .isOrdered(false)
+                               .cartState(0)
                                .quantity(cartRmqDto.getQuantity())
                                .options(cartRmqDto.getOptions())
                                .build()

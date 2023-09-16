@@ -58,6 +58,7 @@ public class OrderConsumerService {
                 //장바구니에서 주문한 경우, 장바구니 주문상태 변화
                 if (validatedCart != null) {
                     validatedCart.setIsOrdered(true);
+                    validatedCart.setCartState(1);
                     cartRepository.save(validatedCart);
                 }
                 orderRepository.save(
