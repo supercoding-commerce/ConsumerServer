@@ -53,28 +53,6 @@ public class OrderConsumerService {
                 channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
                 return;
             }
-            if (orderRmqDto.getCartId() != null) {
-                Cart validatedCart = validateOrderMethod.validateCart(orderRmqDto.getUserId(), orderRmqDto.getCartId());
-                //장바구니에서 주문한 경우, 장바구니 주문상태 변화
-                if (validatedCart != null) {
-                    validatedCart.setIsOrdered(true);
-                    validatedCart.setCartState(1);
-                    cartRepository.save(validatedCart);
-                }
-                orderRepository.save(
-                        Order.builder()
-                                .users(validatedUser)
-                                .products(validatedProduct)
-                                .carts(validatedCart)
-                                .sellers(validatedProduct.getSeller())
-                                .createdAt(LocalDateTime.now())
-                                .orderState(orderRmqDto.getOrderState())
-                                .totalPrice(orderRmqDto.getTotal_price())
-                                .quantity(orderRmqDto.getQuantity())
-                                .options(orderRmqDto.getOptions())
-                                .build()
-                );
-            } else {
 
                 orderRepository.save(
                         Order.builder()
@@ -88,7 +66,7 @@ public class OrderConsumerService {
                                 .options(orderRmqDto.getOptions())
                                 .build()
                 );
-            }
+
 
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 

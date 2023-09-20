@@ -68,6 +68,7 @@ public class CartConsumerService {
             cartRepository.save(
                     validatedCart
             );
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
             log.error("putCart exception: " + e.getMessage(), e);
             message.getMessageProperties().setHeader("failed_causes", "관리자 문의");

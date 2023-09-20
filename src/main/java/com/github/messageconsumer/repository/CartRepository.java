@@ -4,9 +4,11 @@ import com.github.messageconsumer.entity.Cart;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<Cart> findById(Long cartId);
 
+    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     Cart findByIdAndUsersId(Long id, Long userId);
 
     boolean existsByUsersIdAndProductsId(Long userId, Long productId);

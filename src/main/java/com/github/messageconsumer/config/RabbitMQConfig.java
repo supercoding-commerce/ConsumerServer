@@ -92,7 +92,7 @@ public class RabbitMQConfig {
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter(objectMapper));
         // prefetch 설정 (한 번에 가져올 메시지 개수)
-        factory.setPrefetchCount(10); // 예: 10개의 메시지를 미리 가져옴
+        factory.setPrefetchCount(1); // 예: 10개의 메시지를 미리 가져옴
 
         // channel 개수 설정 (동시에 처리할 메시지 수)
         factory.setConcurrentConsumers(3); // 예: 5개의 채널을 사용하여 메시지 처리
