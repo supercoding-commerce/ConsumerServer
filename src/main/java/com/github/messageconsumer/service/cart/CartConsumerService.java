@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class CartConsumerService {
                        Cart.builder()
                                .users(validatedUser)
                                .products(validatedProduct)
-                               .createdAt(LocalDateTime.now())
+                               .createdAt(getKoreanTime())
                                .isOrdered(false)
                                .cartState(0)
                                .quantity(cartRmqDto.getQuantity())
@@ -73,5 +75,14 @@ public class CartConsumerService {
             message.getMessageProperties().setHeader("failed_causes", "관리자 문의");
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
         }
+    }
+
+    public LocalDateTime getKoreanTime(){
+        ZoneId koreanZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime koreanTime = ZonedDateTime.now(koreanZone);
+
+        // Convert it to LocalDateTime
+        return koreanTime.toLocalDateTime();
+
     }
 }

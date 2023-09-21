@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -37,7 +39,7 @@ public class FailedOrderService {
             // 실패한 메시지를 데이터베이스에 저장
             FailedLog failedLog = new FailedLog();
             failedLog.setMessageBody(messageBody);
-            failedLog.setCreatedAt(LocalDateTime.now());
+            failedLog.setCreatedAt(getKoreanTime());
             failedLogRepository.save(failedLog);
 
             String causes = (String) message.getMessageProperties().getHeaders().getOrDefault("failed-causes", "서버오류");
@@ -46,7 +48,7 @@ public class FailedOrderService {
                 orderRepository.save(
                                 Order.builder()
                                         .products(productOptional.get())
-                                        .createdAt(LocalDateTime.now())
+                                        .createdAt(getKoreanTime())
                                         .orderState(6)
                                         .totalPrice(orderRmqDto.getTotal_price())
                                         .quantity(orderRmqDto.getQuantity())
@@ -66,5 +68,12 @@ public class FailedOrderService {
 
 
     }
+    public LocalDateTime getKoreanTime(){
+        ZoneId koreanZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime koreanTime = ZonedDateTime.now(koreanZone);
 
+        // Convert it to LocalDateTime
+        return koreanTime.toLocalDateTime();
+
+    }
 }

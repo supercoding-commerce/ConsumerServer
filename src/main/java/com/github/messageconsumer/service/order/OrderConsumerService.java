@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -61,7 +63,7 @@ public class OrderConsumerService {
                                 .products(validatedProduct)
                                 .carts(validatedCart)
                                 .sellers(validatedProduct.getSeller())
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(getKoreanTime())
                                 .orderState(orderRmqDto.getOrderState())
                                 .orderTag(orderRmqDto.getOrderTag())
                                 .totalPrice(orderRmqDto.getTotal_price())
@@ -75,7 +77,7 @@ public class OrderConsumerService {
                                 .users(validatedUser)
                                 .products(validatedProduct)
                                 .sellers(validatedProduct.getSeller())
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(getKoreanTime())
                                 .orderState(orderRmqDto.getOrderState())
                                 .orderTag(orderRmqDto.getOrderTag())
                                 .totalPrice(orderRmqDto.getTotal_price())
@@ -132,5 +134,14 @@ public class OrderConsumerService {
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
 
         }
+    }
+
+    public LocalDateTime getKoreanTime(){
+        ZoneId koreanZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime koreanTime = ZonedDateTime.now(koreanZone);
+
+        // Convert it to LocalDateTime
+        return koreanTime.toLocalDateTime();
+
     }
 }

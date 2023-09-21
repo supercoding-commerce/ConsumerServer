@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -39,7 +41,7 @@ public class FailedCartService {
             // 실패한 메시지를 데이터베이스에 저장
             FailedLog failedLog = new FailedLog();
             failedLog.setMessageBody(messageBody);
-            failedLog.setCreatedAt(LocalDateTime.now());
+            failedLog.setCreatedAt(getKoreanTime());
             failedLogRepository.save(failedLog);
 
             String causes = (String) message.getMessageProperties().getHeaders().getOrDefault("failed-causes", "서버오류");
@@ -48,7 +50,7 @@ public class FailedCartService {
                 cartRepository.save(
                         Cart.builder()
                                 .products(productOptional.get())
-                                .createdAt(LocalDateTime.now())
+                                .createdAt(getKoreanTime())
                                 .cartState(3)
                                 .quantity(cartRmqDto.getQuantity())
                                 .options(cartRmqDto.getOptions())
@@ -65,4 +67,13 @@ public class FailedCartService {
             }
 
         }
+
+    public LocalDateTime getKoreanTime(){
+        ZoneId koreanZone = ZoneId.of("Asia/Seoul");
+        ZonedDateTime koreanTime = ZonedDateTime.now(koreanZone);
+
+        // Convert it to LocalDateTime
+        return koreanTime.toLocalDateTime();
+
+    }
 }
