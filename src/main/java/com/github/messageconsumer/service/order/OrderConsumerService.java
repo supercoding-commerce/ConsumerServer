@@ -54,10 +54,19 @@ public class OrderConsumerService {
                 return;
             }
 
+            if(orderRmqDto.getCartId() != null) {
+                log.info("ordered cartId: " + orderRmqDto.getCartId());
+                log.info("ordered userId: " + orderRmqDto.getUserId());
+                Cart validatedCart = validateOrderMethod.validateCart(orderRmqDto.getCartId(), orderRmqDto.getUserId());
+                //장바구니에서 주문한 경우, 장바구니 주문상태 변화
+                validatedCart.setCartState(1);
+                cartRepository.save(validatedCart);
+
                 orderRepository.save(
                         Order.builder()
                                 .users(validatedUser)
                                 .products(validatedProduct)
+                                .carts(validatedCart)
                                 .sellers(validatedProduct.getSeller())
                                 .createdAt(LocalDateTime.now())
                                 .orderState(orderRmqDto.getOrderState())
@@ -66,8 +75,22 @@ public class OrderConsumerService {
                                 .options(orderRmqDto.getOptions())
                                 .build()
                 );
+            }else {
+                orderRepository.save(
+                        Order.builder()
+                                .users(validatedUser)
+                                .products(validatedProduct)
+                                .sellers(validatedProduct.getSeller())
+                                .createdAt(LocalDateTime.now())
+                                .orderState(orderRmqDto.getOrderState())
+                                .orderTag(orderRmqDto.getOrderTag())
+                                .totalPrice(orderRmqDto.getTotal_price())
+                                .quantity(orderRmqDto.getQuantity())
+                                .options(orderRmqDto.getOptions())
+                                .build()
+                );
 
-
+            }
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
         } catch (IOException e) {

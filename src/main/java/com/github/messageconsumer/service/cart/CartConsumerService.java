@@ -6,7 +6,6 @@ import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.CartRepository;
 import com.github.messageconsumer.service.cart.util.ValidatCartMethod;
-import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

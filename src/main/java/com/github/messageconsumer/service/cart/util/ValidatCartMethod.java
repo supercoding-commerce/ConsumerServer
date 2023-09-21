@@ -45,12 +45,8 @@ public class ValidatCartMethod {
     }
 
     public Cart validateCart(Long cartId, Long userId){
-        Cart cart = cartRepository.findByIdAndUsersId(cartId, userId);
+        return cartRepository.findByIdAndUsersId(cartId, userId).orElseThrow(()->new CartException(CartErrorCode.THIS_CART_DOES_NOT_EXIST));
 
-        if (cart == null) {
-            throw new CartException(CartErrorCode.THIS_CART_DOES_NOT_EXIST);
-        }
-        return cart;
     }
 
     private boolean existsInCart(Long userId, Long productId){

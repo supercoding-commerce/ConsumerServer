@@ -49,7 +49,7 @@ public class FailedCartService {
                         Cart.builder()
                                 .products(productOptional.get())
                                 .createdAt(LocalDateTime.now())
-                                .cartState(2)
+                                .cartState(3)
                                 .quantity(cartRmqDto.getQuantity())
                                 .options(cartRmqDto.getOptions())
                                 .failed_causes(causes)

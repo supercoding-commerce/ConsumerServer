@@ -18,6 +18,7 @@ public class CartRmqDto {
     private String imageUrl;
     private Integer quantity;
     private Boolean isOrdered;
+    private String orderTag;
     private Integer totalPrice;
     private String options;
 

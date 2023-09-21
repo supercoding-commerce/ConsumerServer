@@ -22,7 +22,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     )
     Page<Order> findAllByUsersIdAndCursorId(Long userId, Long cursorId, PageRequest of);
 
-    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     Optional<Order> findByIdAndUsersId(Long orderId, Long userId);
 
     List<Order> findAllByUsersIdOrderByCreatedAtDesc(Long userId);

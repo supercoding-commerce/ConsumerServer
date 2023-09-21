@@ -14,6 +14,7 @@ public class OrderRmqDto {
     private Long userId;
     private Long sellerId;
     private Integer orderState;
+    private String orderTag;
     private Integer quantity;
     private Long total_price;
     private String options;

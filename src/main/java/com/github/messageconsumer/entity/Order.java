@@ -41,6 +41,9 @@ public class Order {
     @Column(name = "order_state")
     private Integer orderState;
 
+    @Column(name = "order_tag")
+    private String orderTag;
+
     @Column(name="quantity")
     private Integer quantity;
 

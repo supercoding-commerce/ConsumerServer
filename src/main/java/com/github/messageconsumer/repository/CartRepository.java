@@ -25,8 +25,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     Optional<Cart> findById(Long cartId);
 
-    @Lock(value = LockModeType.PESSIMISTIC_WRITE)
-    Cart findByIdAndUsersId(Long id, Long userId);
+    Optional<Cart> findByIdAndUsersId(Long id, Long userId);
 
     boolean existsByUsersIdAndProductsId(Long userId, Long productId);
 

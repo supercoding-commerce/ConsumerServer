@@ -53,12 +53,7 @@ public class ValidateOrderMethod {
     }
 
     public Cart validateCart(Long cartId, Long userId){
-        Cart cart = cartRepository.findByIdAndUsersId(cartId, userId);
-
-        if (cart == null) {
-            throw new CartException(CartErrorCode.THIS_CART_DOES_NOT_EXIST);
-        }
-        return cart;
+        return cartRepository.findByIdAndUsersId(cartId, userId).orElseThrow(()->new CartException(CartErrorCode.THIS_CART_DOES_NOT_EXIST));
     }
 
 
