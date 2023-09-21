@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +24,6 @@ import java.util.Optional;
 @Service
 public class FailedOrderService {
 
-    private final RabbitTemplate rabbitTemplate;
     private final FailedLogRepository failedLogRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;

@@ -1,6 +1,5 @@
 package com.github.messageconsumer.service.order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.messageconsumer.dto.OrderRmqDto;
 import com.github.messageconsumer.entity.Cart;
 import com.github.messageconsumer.entity.Order;
@@ -8,16 +7,12 @@ import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.CartRepository;
 import com.github.messageconsumer.repository.OrderRepository;
-import com.github.messageconsumer.service.order.exception.OrderErrorCode;
-import com.github.messageconsumer.service.order.exception.OrderException;
 import com.github.messageconsumer.service.order.util.ValidateOrderMethod;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.*;
-import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +26,6 @@ public class OrderConsumerService {
     private final ValidateOrderMethod validateOrderMethod;
     private final OrderRepository orderRepository;
     private final CartRepository cartRepository;
-    private final ObjectMapper objectMapper;
 
     @Transactional
     @RabbitListener(
@@ -45,7 +39,6 @@ public class OrderConsumerService {
             Product validatedProduct = validateOrderMethod.validateProduct(orderRmqDto.getProductId());
             User validatedUser = validateOrderMethod.validateUser(orderRmqDto.getUserId());
             boolean isStockValid = validateOrderMethod.validateStock(orderRmqDto.getQuantity(), validatedProduct);
-            System.out.println("22222: " + isStockValid);
             if (!isStockValid) {
                 // 재고 부족 시 Nack 처리
                 log.debug("재고가 부족합니다");
