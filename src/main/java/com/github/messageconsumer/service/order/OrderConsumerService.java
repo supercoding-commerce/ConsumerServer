@@ -70,6 +70,7 @@ public class OrderConsumerService {
                                 .sellers(validatedProduct.getSeller())
                                 .createdAt(LocalDateTime.now())
                                 .orderState(orderRmqDto.getOrderState())
+                                .orderTag(orderRmqDto.getOrderTag())
                                 .totalPrice(orderRmqDto.getTotal_price())
                                 .quantity(orderRmqDto.getQuantity())
                                 .options(orderRmqDto.getOptions())
