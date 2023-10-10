@@ -1,0 +1,69 @@
+spring:
+  mvc:
+    path_match:
+      matching-strategy: ant_path_matcher
+
+  datasource:
+    master:
+      hikari:
+        username: test
+        password: test
+        driver-class-name: org.h2.Driver
+        jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    slave:
+      hikari:
+        username: test
+        password: test
+        driver-class-name: org.h2.Driver
+        jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    slave2:
+      hikari:
+        username: test
+        password: test
+        driver-class-name: org.h2.Driver
+        jdbc-url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/testdb
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+      enabled: true
+
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: ALWAYS
+
+springdoc:
+  swagger-ui:
+    path: /api-doc.html
+
+jwt:
+  secret-key-source: 7YWM7Iqk7Yq466W8IOychO2VnCDtgqTrpbwg7IOd7ISx7ZWp64uI64uk
+
+cloud:
+  aws:
+    s3:
+      bucket: mockBucket
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: mockAccessKey
+      secretKey: mockSecretKey

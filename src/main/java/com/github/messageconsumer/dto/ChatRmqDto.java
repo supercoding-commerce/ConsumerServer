@@ -10,7 +10,7 @@ import java.util.Map;
 @Builder
 public class ChatRmqDto {
     private String customRoomId;
-    private Integer messageTag;
+//    private Integer messageTag;
     private String sender;
     private String content;
     private String createdAt;

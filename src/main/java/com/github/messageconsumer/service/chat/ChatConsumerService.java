@@ -51,7 +51,6 @@ public class ChatConsumerService {
                 chatRepository.save(chat); // Chat 업데이트 후 저장
                 channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             } else {
-                System.out.println("postRoom222222222");
                 // 존재하지 않는 경우 새로운 Chat 객체 생성 및 저장
                 Chat newChat = Chat.builder()
                         .customRoomId(roomRmqDto.getCustomRoomId())
@@ -73,25 +72,60 @@ public class ChatConsumerService {
         }
     }
 
-    @RabbitListener(queues = "postChat1", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(
+            bindings = @QueueBinding(
+            exchange = @Exchange(value = "exchange"),
+            value = @Queue(value = "postChat1")
+            ),
+            ackMode = "MANUAL",
+            containerFactory = "rabbitListenerContainerFactory"
+    )
     public void postChat1(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         postChatService.postChat(chatRmqDto, message,  channel);
     }
 
-    @RabbitListener(queues = "postChat2", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    exchange = @Exchange(value = "exchange"),
+                    value = @Queue(value = "postChat2")
+            ),
+            ackMode = "MANUAL",
+            containerFactory = "rabbitListenerContainerFactory"
+    )
     public void postChat2(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         postChatService.postChat(chatRmqDto, message,  channel);
     }
 
-    @RabbitListener(queues = "postChat3", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    exchange = @Exchange(value = "exchange"),
+                    value = @Queue(value = "postChat3")
+            ),
+            ackMode = "MANUAL",
+            containerFactory = "rabbitListenerContainerFactory"
+    )
     public void postChat3(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         postChatService.postChat(chatRmqDto, message,  channel);
     }
-    @RabbitListener(queues = "postChat4", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    exchange = @Exchange(value = "exchange"),
+                    value = @Queue(value = "postChat4")
+            ),
+            ackMode = "MANUAL",
+            containerFactory = "rabbitListenerContainerFactory"
+    )
     public void postChat4(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         postChatService.postChat(chatRmqDto, message,  channel);
     }
-    @RabbitListener(queues = "postChat5", containerFactory = "rabbitListenerContainerFactory")
+    @RabbitListener(
+            bindings = @QueueBinding(
+                    exchange = @Exchange(value = "exchange"),
+                    value = @Queue(value = "postChat5")
+            ),
+            ackMode = "MANUAL",
+            containerFactory = "rabbitListenerContainerFactory"
+    )
     public void postChat5(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         postChatService.postChat(chatRmqDto, message,  channel);
     }

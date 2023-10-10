@@ -7,6 +7,7 @@ import com.github.messageconsumer.entity.Product;
 import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.CartRepository;
 import com.github.messageconsumer.repository.OrderRepository;
+import com.github.messageconsumer.service.order.exception.OrderException;
 import com.github.messageconsumer.service.order.util.ValidateOrderMethod;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
@@ -89,7 +90,7 @@ public class OrderConsumerService {
             }
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             log.debug("postOrder exception: " + e.getMessage(), e);
             message.getMessageProperties().setHeader("failed_causes", "관리자 문의");
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
@@ -97,44 +98,44 @@ public class OrderConsumerService {
     }
 
 
-    @Transactional
-    @RabbitListener(
-            bindings = @QueueBinding(
-                    exchange = @Exchange(value = "exchange"),
-                    value = @Queue(value = "putOrder",
-                            arguments = @Argument(name="x-dead-letter-exchange", value = "dlqExchange"))
-            ), ackMode = "MANUAL", containerFactory = "rabbitListenerContainerFactory")
-    public void putOrderQueue(OrderRmqDto orderRmqDto, Message message, Channel channel) throws IOException {
-        try {
-            Product validatedProduct = validateOrderMethod.validateProduct(orderRmqDto.getProductId());
-            Order validatedOrder = validateOrderMethod.validateOrder(orderRmqDto.getOrderId(), orderRmqDto.getUserId());
-            Integer inputQuantity = orderRmqDto.getQuantity();
-            String inputOptions = orderRmqDto.getOptions();
-            boolean isStockValid = validateOrderMethod.validateStock(inputQuantity, validatedProduct);
-
-            if (!isStockValid) {
-                // 재고 부족 시 Nack 처리
-                log.debug("재고가 부족합니다");
-                message.getMessageProperties().setHeader("failed_causes", "재고 부족");
-                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
-                return;
-
-            }
-            validatedOrder.setQuantity(inputQuantity);
-            validatedOrder.setOptions(inputOptions);
-
-            orderRepository.save(
-                    validatedOrder
-            );
-
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-        } catch (IOException e) {
-            log.debug("putOrder exception: " + e.getMessage(), e);
-            message.getMessageProperties().setHeader("failed_causes", "관리자 문의");
-            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
-
-        }
-    }
+//    @Transactional
+//    @RabbitListener(
+//            bindings = @QueueBinding(
+//                    exchange = @Exchange(value = "exchange"),
+//                    value = @Queue(value = "putOrder",
+//                            arguments = @Argument(name="x-dead-letter-exchange", value = "dlqExchange"))
+//            ), ackMode = "MANUAL", containerFactory = "rabbitListenerContainerFactory")
+//    public void putOrderQueue(OrderRmqDto orderRmqDto, Message message, Channel channel) throws IOException {
+//        try {
+//            Product validatedProduct = validateOrderMethod.validateProduct(orderRmqDto.getProductId());
+//            Order validatedOrder = validateOrderMethod.validateOrder(orderRmqDto.getOrderId(), orderRmqDto.getUserId());
+//            Integer inputQuantity = orderRmqDto.getQuantity();
+//            String inputOptions = orderRmqDto.getOptions();
+//            boolean isStockValid = validateOrderMethod.validateStock(inputQuantity, validatedProduct);
+//
+//            if (!isStockValid) {
+//                // 재고 부족 시 Nack 처리
+//                log.debug("재고가 부족합니다");
+//                message.getMessageProperties().setHeader("failed_causes", "재고 부족");
+//                channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+//                return;
+//
+//            }
+//            validatedOrder.setQuantity(inputQuantity);
+//            validatedOrder.setOptions(inputOptions);
+//
+//            orderRepository.save(
+//                    validatedOrder
+//            );
+//
+//            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+//        } catch (IOException e) {
+//            log.debug("putOrder exception: " + e.getMessage(), e);
+//            message.getMessageProperties().setHeader("failed_causes", "관리자 문의");
+//            channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
+//
+//        }
+//    }
 
     public LocalDateTime getKoreanTime(){
         ZoneId koreanZone = ZoneId.of("Asia/Seoul");
