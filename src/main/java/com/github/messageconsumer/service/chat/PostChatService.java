@@ -3,6 +3,7 @@ package com.github.messageconsumer.service.chat;
 import com.github.messageconsumer.collection.Chat;
 import com.github.messageconsumer.dto.ChatRmqDto;
 import com.github.messageconsumer.repository.ChatRepository;
+import com.github.messageconsumer.web.controller.ChatAlarmController;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import java.util.Map;
 @Service
 public class PostChatService {
     private final ChatRepository chatRepository;
+    private final ChatAlarmController chatAlarmController;
 
     @Transactional
     public void postChat(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
@@ -30,19 +32,14 @@ public class PostChatService {
             Map<String, String> newMessage = new HashMap<>();
             newMessage.put("sender", chatRmqDto.getSender()); // 발신자 설정
             newMessage.put("content", chatRmqDto.getContent()); // 메시지 내용 설정
-            //newMessage.put("createdAt", chatRmqDto.getCreatedAt());
-//            int messageTag = chatRmqDto.getMessageTag();
-//            int maxMessageTag = chat.getChats().keySet().stream()
-//                    .mapToInt(Integer::intValue)
-//                    .max()
-//                    .orElse(0);
-//
-//            // messageTag를 조정하여 덮어쓰기
-//            int newMessageTag = maxMessageTag > messageTag ? maxMessageTag + messageTag : messageTag;
+
             String sanitizedKey = chatRmqDto.getCreatedAt().replace(".", "-");
             chat.getChats().put(sanitizedKey, newMessage);
             chatRepository.save(chat);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+
+            // 새 메시지 알림을 클라이언트에 전송
+            chatAlarmController.sendEventToClients(newMessage);
 
         } catch (Exception e) {
             log.error("Error processing chat message: " + e.getMessage(), e);

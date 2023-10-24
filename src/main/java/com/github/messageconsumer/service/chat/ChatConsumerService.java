@@ -1,12 +1,8 @@
 package com.github.messageconsumer.service.chat;
 
 import com.github.messageconsumer.collection.Chat;
-import com.github.messageconsumer.dto.CartRmqDto;
 import com.github.messageconsumer.dto.ChatRmqDto;
 import com.github.messageconsumer.dto.RoomRmqDto;
-import com.github.messageconsumer.entity.Cart;
-import com.github.messageconsumer.entity.Product;
-import com.github.messageconsumer.entity.User;
 import com.github.messageconsumer.repository.ChatRepository;
 import com.github.messageconsumer.service.order.exception.OrderException;
 import com.rabbitmq.client.Channel;
@@ -15,12 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
