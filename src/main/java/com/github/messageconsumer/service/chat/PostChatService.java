@@ -8,7 +8,10 @@ import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -20,7 +23,7 @@ import java.util.Map;
 @Service
 public class PostChatService {
     private final ChatRepository chatRepository;
-    private final ChatAlarmController chatAlarmController;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public void postChat(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
@@ -38,13 +41,19 @@ public class PostChatService {
             chatRepository.save(chat);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
-            // 새 메시지 알림을 클라이언트에 전송
-            chatAlarmController.sendEventToClients(newMessage);
+            //SSE
+            applicationEventPublisher.publishEvent(new ChatSseEvent(this, newMessage));
 
         } catch (Exception e) {
             log.error("Error processing chat message: " + e.getMessage(), e);
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, false);
 
         }
+
     }
+
+//    @Async
+//    public void sendChatNotification(Map<String, String> newMessage) {
+//        chatAlarmController.sendEventToClients(newMessage);
+//    }
 }

@@ -2,9 +2,12 @@ package com.github.messageconsumer.web.advice;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -18,9 +21,13 @@ public class LoggingAspect {
 
     @Before("execution(* com.github.messageconsumer..*Controller.*(..))")
     public void beforeAdvice() {
-        String endpoint = request.getRequestURI(); // 현재 요청의 엔드포인트 경로를 얻어옴
-
-        log.info("\u001B[34mAPI 호출! - " + endpoint + "\u001B[0m");
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            String endpoint = request.getRequestURI(); // 현재 요청의 엔드포인트 경로를 얻어옴
+            log.info("\u001B[34mAPI 호출! - " + endpoint + "\u001B[0m");
+        } catch (IllegalStateException e) {
+            log.info("\u001B[34mAPI 호출! - 요청 외부에서 로그가 호출되었습니다.\u001B[0m");
+        }
     }
 
 //    @AfterReturning(pointcut = "execution(* com.github.commerce..*Controller.*(..))", returning = "returnValue")
