@@ -11,6 +11,8 @@ import java.util.Map;
 public class ChatRmqDto {
     private String customRoomId;
 //    private Integer messageTag;
+    private String role;
+    private Long sellerId;
     private String sender;
     private String content;
     private String createdAt;

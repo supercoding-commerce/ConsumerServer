@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,7 +43,9 @@ public class PostChatService {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
             //SSE
-            applicationEventPublisher.publishEvent(new ChatSseEvent(this, newMessage));
+            if(Objects.equals(chatRmqDto.getRole(), "user")){
+                applicationEventPublisher.publishEvent(new ChatSseEvent(this, chatRmqDto));
+            }
 
         } catch (Exception e) {
             log.error("Error processing chat message: " + e.getMessage(), e);

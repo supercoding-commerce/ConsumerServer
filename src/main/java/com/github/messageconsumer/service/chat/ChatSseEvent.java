@@ -1,18 +1,19 @@
 package com.github.messageconsumer.service.chat;
 
+import com.github.messageconsumer.dto.ChatRmqDto;
 import org.springframework.context.ApplicationEvent;
 
 import java.util.Map;
 
 public class ChatSseEvent extends ApplicationEvent {
-    private Map<String, String> message;
+    private ChatRmqDto chatRmqDto;
 
-    public ChatSseEvent(Object source, Map<String, String> message) {
+    public ChatSseEvent(Object source, ChatRmqDto chatRmqDto) {
         super(source);
-        this.message = message;
+        this.chatRmqDto = chatRmqDto;
     }
 
-    public Map<String, String> getMessage() {
-        return message;
+    public ChatRmqDto getMessage() {
+        return chatRmqDto;
     }
 }
