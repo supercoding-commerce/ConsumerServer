@@ -26,7 +26,7 @@ public class PostChatService {
     private final ChatRepository chatRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    @Transactional
+    //@Transactional
     public void postChat(ChatRmqDto chatRmqDto, Message message, Channel channel) throws IOException {
         try {
             // customRoomId에 해당하는 Chat document 조회
@@ -40,12 +40,11 @@ public class PostChatService {
             String sanitizedKey = chatRmqDto.getCreatedAt().replace(".", "-");
             chat.getChats().put(sanitizedKey, newMessage);
             chatRepository.save(chat);
-            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
             //SSE
-            if(Objects.equals(chatRmqDto.getRole(), "user")){
-                applicationEventPublisher.publishEvent(new ChatSseEvent(this, chatRmqDto));
-            }
+            applicationEventPublisher.publishEvent(new ChatSseEvent(this, chatRmqDto));
+
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 
         } catch (Exception e) {
             log.error("Error processing chat message: " + e.getMessage(), e);

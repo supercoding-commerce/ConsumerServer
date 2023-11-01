@@ -2,8 +2,7 @@ package com.github.messageconsumer.service.chat;
 
 import com.github.messageconsumer.dto.ChatRmqDto;
 import org.springframework.context.ApplicationEvent;
-
-import java.util.Map;
+import org.springframework.stereotype.Component;
 
 public class ChatSseEvent extends ApplicationEvent {
     private ChatRmqDto chatRmqDto;
