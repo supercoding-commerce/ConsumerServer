@@ -21,6 +21,6 @@ public class ChatSseListner  implements ApplicationListener<ChatSseEvent> {
     //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onApplicationEvent(ChatSseEvent event) {
         log.info("Received ChatSseEvent: {}", event.getMessage().getContent());
-        chatAlarmController.sendEventToClients(event.getMessage().getCustomRoomId(), event.getMessage());
+        chatAlarmController.sendEventToClients(event.getMessage().getSellerId(), event.getMessage());
     }
 }
