@@ -33,13 +33,17 @@ public class PostChatService {
             Chat chat = chatRepository.findByCustomRoomId(chatRmqDto.getCustomRoomId())
                     .orElse(Chat.builder().customRoomId(chatRmqDto.getCustomRoomId()).build()); // 없으면 새로운 Chat document 생성
 
-            Map<String, String> newMessage = new HashMap<>();
-            newMessage.put("sender", chatRmqDto.getSender()); // 발신자 설정
-            newMessage.put("content", chatRmqDto.getContent()); // 메시지 내용 설정
+            //새로운 메시지 인스턴스
+            Chat.Message newMessage = Chat.Message.builder()
+                    .timestamp(chatRmqDto.getCreatedAt().replace(".", "-"))
+                    .sender(chatRmqDto.getSender())
+                    .content(chatRmqDto.getContent())
+                    .build();
 
-            String sanitizedKey = chatRmqDto.getCreatedAt().replace(".", "-");
-            chat.getChats().put(sanitizedKey, newMessage);
+            // 새로운 메시지를 chats 리스트에 추가
+            chat.getChats().add(newMessage);
             chatRepository.save(chat);
+
 
             //SSE
             applicationEventPublisher.publishEvent(new ChatSseEvent(this, chatRmqDto));
@@ -54,8 +58,4 @@ public class PostChatService {
 
     }
 
-//    @Async
-//    public void sendChatNotification(Map<String, String> newMessage) {
-//        chatAlarmController.sendEventToClients(newMessage);
-//    }
 }
