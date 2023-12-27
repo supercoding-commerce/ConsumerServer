@@ -1,7 +1,6 @@
 package com.github.messageconsumer.web.controller;
 
 import com.github.messageconsumer.dto.ChatRmqDto;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,50 +18,50 @@ public class ChatAlarmController {
     //쓰기 작업이 빈번하게 발생하면 매번 전체 리스트의 복사본을 만들어야 하기 때문에 메모리 사용량이 증가하고 성능이 저하될 수 있습니다.
     //private final CopyOnWriteArrayList<SseEmitterWrapper> emitters = new CopyOnWriteArrayList<>();
 
-    private final ConcurrentHashMap<Long, SseEmitter> userEmitters = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<Long, SseEmitter> sellerEmitters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SseEmitter> userEmitters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SseEmitter> sellerEmitters = new ConcurrentHashMap<>();
 
     @CrossOrigin(origins = "*")
-    @GetMapping("/chat-alarm/seller/{sellerId}")
-    public SseEmitter handleSellerSse(@PathVariable Long sellerId) {
+    @GetMapping("/chat-alarm/seller/{customRoomId}")
+    public SseEmitter handleSellerSse(@PathVariable String customRoomId) {
         SseEmitter emitter = new SseEmitter(3600000L);
 
         // 클라이언트 연결이 종료되면 emitters 목록에서 제거
-        emitter.onCompletion(() -> removeEmitter(sellerId, sellerEmitters));
-        emitter.onTimeout(() -> removeEmitter(sellerId, sellerEmitters));
+        emitter.onCompletion(() -> removeEmitter(customRoomId, sellerEmitters));
+        emitter.onTimeout(() -> removeEmitter(customRoomId, sellerEmitters));
 
         // 새로운 연결이 만들어질 때 기존의 연결을 제거하고 새 연결을 저장
-        sellerEmitters.put(sellerId, emitter);
+        sellerEmitters.put(customRoomId, emitter);
         return emitter;
     }
 
     @CrossOrigin(origins = "*")
-    @GetMapping("/chat-alarm/user/{sellerId}/{userId}")
-    public SseEmitter handleUserSse(@PathVariable Long sellerId) {
+    @GetMapping("/chat-alarm/user/{customRoomId}")
+    public SseEmitter handleUserSse(@PathVariable String customRoomId) {
         SseEmitter emitter = new SseEmitter(3600000L);
 
         // 클라이언트 연결이 종료되면 emitters 목록에서 제거
-        emitter.onCompletion(() -> removeEmitter(sellerId, userEmitters));
-        emitter.onTimeout(() -> removeEmitter(sellerId, userEmitters));
+        emitter.onCompletion(() -> removeEmitter(customRoomId, userEmitters));
+        emitter.onTimeout(() -> removeEmitter(customRoomId, userEmitters));
 
         // 새로운 연결이 만들어질 때 기존의 연결을 제거하고 새 연결을 저장
-        userEmitters.put(sellerId, emitter);
+        userEmitters.put(customRoomId, emitter);
         return emitter;
     }
 
 
-    private void removeEmitter(Long sellerId, ConcurrentHashMap<Long, SseEmitter> emitters) {
-        emitters.remove(sellerId);
+    private void removeEmitter(String customRoomId, ConcurrentHashMap<String, SseEmitter> emitters) {
+        emitters.remove(customRoomId);
     }
 
-    public void sendEventToClients(Long sellerId, ChatRmqDto data) {
-        SseEmitter userEmitter = userEmitters.get(sellerId);
-        SseEmitter sellerEmitter = sellerEmitters.get(sellerId);
+    public void sendEventToClients(String customRoomId, ChatRmqDto data) {
+        SseEmitter userEmitter = userEmitters.get(customRoomId);
+        SseEmitter sellerEmitter = sellerEmitters.get(customRoomId);
         if (userEmitter != null) {
             try {
                 userEmitter.send(SseEmitter.event().name("sse").data(data).reconnectTime(500));
             } catch (Exception ignored) {
-                removeEmitter(sellerId, userEmitters);
+                removeEmitter(customRoomId, userEmitters);
             }
         }
 
@@ -70,7 +69,7 @@ public class ChatAlarmController {
             try {
                 sellerEmitter.send(SseEmitter.event().name("sse").data(data).reconnectTime(500));
             } catch (Exception ignored) {
-                removeEmitter(sellerId, sellerEmitters);
+                removeEmitter(customRoomId, sellerEmitters);
             }
         }
     }

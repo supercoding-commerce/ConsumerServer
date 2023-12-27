@@ -6,15 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
+
 @Slf4j
 @Component
-public class ChatSseListner  implements ApplicationListener<ChatSseEvent> {
+public class ChatSseListener  implements ApplicationListener<ChatSseEvent> {
     private final ChatAlarmController chatAlarmController;
 
     @Autowired
-    public ChatSseListner(ChatAlarmController chatAlarmController) {
+    public ChatSseListener(ChatAlarmController chatAlarmController) {
         this.chatAlarmController = chatAlarmController;
     }
 
@@ -28,7 +27,7 @@ public class ChatSseListner  implements ApplicationListener<ChatSseEvent> {
     //@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onApplicationEvent(ChatSseEvent event) {
         log.info("Received ChatSseEvent: {}", event.getMessage().getContent());
-        chatAlarmController.sendEventToClients(event.getMessage().getSellerId(), event.getMessage());
+        chatAlarmController.sendEventToClients(event.getMessage().getCustomRoomId(), event.getMessage());
     }
 
 //    // 이 메서드는 트랜잭션이 커밋된 후에 호출되어 SSE 이벤트를 발행합니다.
